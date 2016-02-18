@@ -10,21 +10,24 @@ void ArchiveReader::deleteEntry(ArchiveEntry *entry)
 	
 	if (entry->name) {
 		delete[] entry->name;
+		entry->name = NULL;
 	}
 	
 	if (entry->content) {
 		delete[] entry->content;
+		entry->content = NULL;
 	}
 	
 	if (entry->info) {
 		delete entry->info;
+		entry->info = NULL;
 	}
 	
 	delete entry;
 }
 
 
-size_t ArchiveReader::calculateNextRead(size_t readed, size_t maxSize, ArchiveEntryInfo *info)
+uint64_t ArchiveReader::calculateNextRead(uint64_t readed, uint64_t maxSize, ArchiveEntryInfo *info)
 {
 	if (info->contentLength < maxSize) {
 		return info->contentLength;
@@ -51,11 +54,12 @@ ArchiveReader::ArchiveReader(const std::string &file)
 
 ArchiveReader::~ArchiveReader()
 {
-	close();
-	
 	if (header) {
 		delete header;
+		header = NULL;
 	}
+
+	close();
 }
 
 
@@ -123,7 +127,7 @@ ArchiveEntryInfo* ArchiveReader::getNextEntryInfo()
 }
 
 
-void ArchiveReader::readEntryContent(char *buffer, size_t length, size_t offset)
+void ArchiveReader::readEntryContent(char *buffer, uint64_t length, uint64_t offset)
 {
 	if (!isOpen() || !isValid()) {
 		return;
@@ -161,7 +165,7 @@ bool ArchiveReader::open(const std::string &file)
 	}
 	
 	fseek(stream, 0, SEEK_END);
-	long int size = ftell(stream);
+	uint64_t size = ftell(stream);
 	fseek(stream, 0, SEEK_SET);
 	
 	if (size < sizeof(ArchiveHeader)) {
@@ -187,6 +191,7 @@ void ArchiveReader::close()
 {
 	if (isOpen()) {
 		fclose(stream);
+		stream = NULL;
 	}
 }
 

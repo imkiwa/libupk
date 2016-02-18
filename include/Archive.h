@@ -5,6 +5,7 @@
 #include <limits.h>
 #include <sys/stat.h>
 #include <sys/types.h>
+#include <stdint.h>
 
 #include <string>
 
@@ -42,15 +43,15 @@ typedef struct
 	char mg0 = MG0;
 	char mg1 = MG1;
 	
-	int major = MAJOR;
-	int minor = MINOR;
+	int32_t major = MAJOR;
+	int32_t minor = MINOR;
 } ArchiveHeader;
 
 
 typedef struct
 {
-	long int contentLength = 0;
-	size_t nameLength = 0;
+	uint64_t contentLength = 0;
+	uint64_t nameLength = 0;
 } ArchiveEntryInfo;
 
 
@@ -70,7 +71,7 @@ private:
 
 public:
 	static void deleteEntry(ArchiveEntry *entry);
-	static size_t calculateNextRead(size_t readed, size_t maxSize, ArchiveEntryInfo *info);
+	static uint64_t calculateNextRead(uint64_t readed, uint64_t maxSize, ArchiveEntryInfo *info);
 	
 public:
 	ArchiveReader();
@@ -83,7 +84,7 @@ public:
 	ArchiveEntry* getNextEntry();
 	ArchiveEntryInfo* getNextEntryInfo();
 	
-	void readEntryContent(char *buffer, size_t length, size_t offset);
+	void readEntryContent(char *buffer, uint64_t length, uint64_t offset);
 	void readEntryContent(char *buffer, ArchiveEntryInfo *info);
 	
 	void readEntryName(char *buffer, ArchiveEntryInfo *info);

@@ -22,10 +22,10 @@ void do_extract_entry(ArchiveReader &re, ArchiveEntryInfo *info, const char *nam
 	
 	FILE *fp = fopen(name, "wb");
 	
-	const int size = 1024;
+	const uint64_t size = 1024;
 	char buffer[size] = {0};
-	size_t readed = 0;
-	size_t next = 0;
+	uint64_t readed = 0;
+	uint64_t next = 0;
 	
 	while (readed < info->contentLength) {
 		next = ArchiveReader::calculateNextRead(readed, size, info);
@@ -59,6 +59,8 @@ void do_extract_archive(const char *file, bool onlyList)
 		} else {
 			do_extract_entry(re, e, name);
 		}
+
+		delete e;
 	}
 	
 	re.close();
@@ -84,6 +86,8 @@ int usage(const char *file, char **args)
 
 void do_minigzip(const char *file, char *tmpfile, bool comp)
 {
+	int fd = mkstemp(tmpfile);
+
 	int status;
 	pid_t pid = fork();
 	
@@ -101,11 +105,10 @@ void do_minigzip(const char *file, char *tmpfile, bool comp)
 			argv[3] = (char*) file;
 		}
 		
-		int fd = mkstemp(tmpfile);
-		
 		dup2(fd, STDOUT_FILENO);
 		minigzip(argc, argv);
-		close(fd);
+
+		exit(0);
 		
 	} else if (pid > 0) {
 		// parent
@@ -115,6 +118,8 @@ void do_minigzip(const char *file, char *tmpfile, bool comp)
 		fprintf(stderr, "fork: %s\n", strerror(errno));
 		exit(1);
 	}
+
+	close(fd);
 }
 
 

@@ -1,5 +1,6 @@
 #include <dirent.h>
 #include <errno.h>
+#include <string.h>
 
 #include "Archive.h"
 
@@ -227,5 +228,6 @@ void ArchiveWriter::close()
 {
 	if (isOpen()) {
 		fclose(stream);
+		stream = NULL;
 	}
 }
