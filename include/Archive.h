@@ -9,8 +9,7 @@
 
 #include <string>
 
-#define MG0 0x77
-#define MG1 0xa5
+#define MAGIC 0x77
 #define MAJOR 1
 #define MINOR 0
 
@@ -40,8 +39,7 @@ namespace kiva {
 
 typedef struct
 {
-	char mg0 = MG0;
-	char mg1 = MG1;
+	char magic = MAGIC;
 	
 	int32_t major = MAJOR;
 	int32_t minor = MINOR;

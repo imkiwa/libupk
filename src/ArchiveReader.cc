@@ -54,11 +54,6 @@ ArchiveReader::ArchiveReader(const std::string &file)
 
 ArchiveReader::~ArchiveReader()
 {
-	if (header) {
-		delete header;
-		header = NULL;
-	}
-
 	close();
 }
 
@@ -116,8 +111,7 @@ ArchiveEntryInfo* ArchiveReader::getNextEntryInfo()
 	
 	ArchiveEntryInfo *info = new ArchiveEntryInfo;
 	
-	fread(info, sizeof(ArchiveEntryInfo), 1, stream);
-	
+	readEntryContent((char*) info, sizeof(ArchiveEntryInfo), 0);
 	if (info->nameLength <= 0 || info->contentLength <= 0) {
 		delete info;
 		return NULL;
@@ -177,9 +171,10 @@ bool ArchiveReader::open(const std::string &file)
 		return false;
 	}
 	
-	fread(header, sizeof(ArchiveHeader), 1, stream);
-	if (header->mg0 != MG0 || header->mg1 != MG1) {
+	readEntryContent((char*) header, sizeof(ArchiveHeader), 0);
+	if (header->magic != MAGIC) {
 		delete header;
+		header = NULL;
 		return false;
 	}
 	
@@ -192,6 +187,11 @@ void ArchiveReader::close()
 	if (isOpen()) {
 		fclose(stream);
 		stream = NULL;
+	}
+
+	if (isValid()) {
+		delete header;
+		header = NULL;
 	}
 }
 
