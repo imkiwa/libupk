@@ -1,6 +1,6 @@
 
 export CXX := g++
-export CXXFLAGS += -O2 -DANDROID -fPIC --pie -std=c++11 -fexceptions -frtti -L../.. -lupk
+export CXXFLAGS += -O2 -DANDROID -fPIC --pie -std=c++11 -fexceptions -frtti -L../.. -lupk -lz
 
 export MAKE := make --no-print-directory
 

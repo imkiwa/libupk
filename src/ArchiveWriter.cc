@@ -115,12 +115,12 @@ void ArchiveWriter::add(const std::string &path)
 	}
 	
 	if (S_ISSOCK(buf.st_mode)) {
-		printf("%s: socket ignored\n", path.c_str());
+		fprintf(stderr, "%s: socket ignored\n", path.c_str());
 		return;
 	}
 	
 	if (isSameFile(&buf, &fileInfo)) {
-		printf("%s: is the archive, skipping\n", path.c_str());
+		fprintf(stderr, "%s: is the archive, skipping\n", path.c_str());
 		return;
 	}
 	
@@ -148,7 +148,7 @@ void ArchiveWriter::addFile(const std::string &file)
 		return;
 	}
 	
-	printf("%s\n", parsedName.c_str());
+	fprintf(stderr, "%s\n", parsedName.c_str());
 	
 	ArchiveEntry ent;
 	ent.info = new ArchiveEntryInfo;

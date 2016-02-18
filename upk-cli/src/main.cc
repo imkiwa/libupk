@@ -2,8 +2,12 @@
 #include <string.h>
 #include <malloc.h>
 #include <stdlib.h>
+#include <errno.h>
+#include <sys/wait.h>
 
 #include "Archive.h"
+
+extern int minigzip(int, char**);
 
 using namespace kiva;
 
@@ -47,7 +51,7 @@ void do_extract_archive(const char *file, bool onlyList)
 		char name[e->nameLength+1] = {0};
 		re.readEntryName(name, e);
 		
-		printf("%s\n", name);
+		fprintf(stderr, "%s\n", name);
 		
 		if (onlyList) {
 			re.readEntryContent(NULL, e);
@@ -78,9 +82,63 @@ int usage(const char *file, char **args)
 }
 
 
+void do_minigzip(const char *file, char *tmpfile, bool comp)
+{
+	int status;
+	pid_t pid = fork();
+	
+	if (pid == 0) {
+		// child
+		int argc;
+		char *argv[] = { (char*) "minigzip", (char*) "-c", NULL, NULL, NULL };
+		
+		if (comp) {
+			argc = 3;
+			argv[2] = (char*) file;
+		} else {
+			argc = 4;
+			argv[2] = (char*) "-d";
+			argv[3] = (char*) file;
+		}
+		
+		int fd = mkstemp(tmpfile);
+		
+		dup2(fd, STDOUT_FILENO);
+		minigzip(argc, argv);
+		close(fd);
+		
+	} else if (pid > 0) {
+		// parent
+		waitpid(pid, &status, 0);
+	
+	} else {
+		fprintf(stderr, "fork: %s\n", strerror(errno));
+		exit(1);
+	}
+}
+
+
+void common_extract(const char *file, bool listOnly)
+{
+	char tmpfile[] = ".upk-tmp-XXXXXXX";
+	
+	do_minigzip(file, tmpfile, false);
+	do_extract_archive(tmpfile, listOnly);
+	
+	unlink(tmpfile);
+}
+
+
 int listArchive(const char *file, char **args)
 {
-	do_extract_archive(file, true);
+	common_extract(file, true);
+	return 0;
+}
+
+
+int extractArchive(const char *file, char **args)
+{
+	common_extract(file, false);
 	return 0;
 }
 
@@ -100,13 +158,11 @@ int createArchive(const char *file, char **args)
 	}
 	
 	wr.close();
-	return 0;
-}
-
-
-int extractArchive(const char *file, char **args)
-{
-	do_extract_archive(file, false);
+	
+	char tmpfile[] = ".upk-tmp-XXXXXXXX";
+	do_minigzip(file, tmpfile, true);
+	rename(tmpfile, file);
+	
 	return 0;
 }
 
