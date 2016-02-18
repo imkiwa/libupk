@@ -73,8 +73,12 @@ static bool mkdirp(char *path, int mode)
 
 bool ArchiveWriter::mkdirForFile(const std::string &file)
 {
-	std::string path = std::move(file.substr(0, file.find_last_of('/')));
-	
+	int pos = file.find_last_of('/');
+	if (pos == std::string::npos) {
+		return true;
+	}
+
+	std::string path = std::move(file.substr(0, pos));
 	return mkdirp((char*) path.c_str(), 0755);
 }
 
