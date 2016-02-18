@@ -1,3 +1,3 @@
 libupk
 ===
-Simple Universal Package(no compress)
+Simple Universal Package(with gzip compress)
